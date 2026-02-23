@@ -176,13 +176,6 @@ docker run -d \
   saveit
 ```
 
-### Option C — Pull from registry (when published)
-
-```bash
-docker pull ghcr.io/yourname/saveit:latest
-docker run -d -p 8080:8080 ghcr.io/yourname/saveit:latest
-```
-
 ---
 
 ## Project Structure
