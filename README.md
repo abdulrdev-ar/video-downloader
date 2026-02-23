@@ -182,6 +182,10 @@ docker run -d \
 
 ```
 src/
+├── actions/
+│   ├── youtube-downloader.action.ts # Server actions for YouTube
+│   ├── tiktok-downloader.action.ts  # Server actions for TikTok
+│   └── instagram-downloader.action.ts # Server actions for Instagram
 ├── app/
 │   ├── page.tsx                    # Landing page (/)
 │   ├── layout.tsx                  # Root layout + global SEO metadata
