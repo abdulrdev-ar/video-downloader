@@ -6,7 +6,7 @@ This project is built with Next.js and TypeScript.
 
 ## Requirements
 
-- Node.js 24+
+- Node.js 22+
 - npm, yarn, pnpm or bun package manager
 - yt-dlp installed on the server
 
@@ -44,7 +44,7 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 ✅ Youtube
 
-❌ Instagram
+✅ Instagram
 
 ❌ Facebook
 
