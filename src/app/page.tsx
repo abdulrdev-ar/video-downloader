@@ -3,9 +3,9 @@ import Link from "next/link";
 import Navbar from "@/components/navbar";
 
 export const metadata: Metadata = {
-  title: "SaveIt — Free Video Downloader for YouTube, TikTok & Instagram",
+  title: "SaveIt — Free Video & Image Downloader",
   description:
-    "Download videos from YouTube, TikTok and Instagram for free. No watermark, HD quality, no login required. The fastest online video downloader.",
+    "Download public videos and images from YouTube, TikTok, Instagram, Facebook, X, and Threads for free.",
   alternates: { canonical: "https://saveit.app" },
 };
 
@@ -35,9 +35,9 @@ const PLATFORMS = [
   {
     href: "/tiktok",
     name: "TikTok",
-    tagline: "No watermark",
+    tagline: "Videos & Photo Posts",
     description:
-      "Save TikTok videos without the annoying watermark. Clean, original quality file direct to your device.",
+      "Save TikTok videos without watermark and download every image from public photo posts.",
     accent: "from-pink-500 to-cyan-400",
     border: "border-pink-500/20 hover:border-pink-500/50",
     glow: "hover:shadow-pink-500/10",
@@ -51,15 +51,15 @@ const PLATFORMS = [
       "Zero watermark",
       "HD video quality",
       "Audio extraction",
-      "All regions",
+      "Photo posts",
     ],
   },
   {
     href: "/instagram",
     name: "Instagram",
-    tagline: "Reels & Posts",
+    tagline: "Reels, Photos & Carousels",
     description:
-      "Download Instagram Reels, feed posts, IGTV and carousel slides. Full resolution, original quality.",
+      "Download Instagram Reels, feed photos, IGTV, and image or video carousel slides.",
     accent: "from-yellow-400 via-pink-500 to-purple-600",
     border: "border-purple-500/20 hover:border-purple-500/50",
     glow: "hover:shadow-purple-500/10",
@@ -71,9 +71,75 @@ const PLATFORMS = [
     ),
     features: [
       "Reels & feed posts",
-      "Carousel support",
+      "Photo carousels",
       "IGTV videos",
       "Original quality",
+    ],
+  },
+  {
+    href: "/facebook",
+    name: "Facebook",
+    tagline: "Videos, Reels & Photos",
+    description:
+      "Download public Facebook videos, reels, and image posts in their available quality.",
+    accent: "from-blue-500 to-blue-600",
+    border: "border-blue-500/20 hover:border-blue-500/50",
+    glow: "hover:shadow-blue-500/10",
+    bg: "from-blue-500/8 to-transparent",
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-7 h-7 fill-white">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+      </svg>
+    ),
+    features: [
+      "Videos & reels",
+      "HD quality",
+      "fb.watch links",
+      "Public image posts",
+    ],
+  },
+  {
+    href: "/twitter",
+    name: "X",
+    tagline: "Videos, GIFs & Images",
+    description:
+      "Download videos, GIFs, and original images from public X or Twitter posts.",
+    accent: "from-sky-400 to-blue-500",
+    border: "border-sky-500/20 hover:border-sky-500/50",
+    glow: "hover:shadow-sky-500/10",
+    bg: "from-sky-500/8 to-transparent",
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-7 h-7 fill-white">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+    ),
+    features: [
+      "X & Twitter posts",
+      "Multiple bitrates",
+      "GIF support",
+      "Image posts",
+    ],
+  },
+  {
+    href: "/threads",
+    name: "Threads",
+    tagline: "Videos & Images",
+    description:
+      "Download videos and images from public Threads posts on threads.com.",
+    accent: "from-zinc-100 to-zinc-400",
+    border: "border-zinc-500/20 hover:border-zinc-400/50",
+    glow: "hover:shadow-zinc-500/10",
+    bg: "from-zinc-500/8 to-transparent",
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-7 h-7 fill-white">
+        <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.59 12c.025 3.086.718 5.496 2.057 7.164 1.432 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.34-.776-.963-1.394-1.83-1.82-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.217-3.259-.785a4.96 4.96 0 01-2.039-2.696c-.196-.996-.164-2.068.093-3.15.304-1.267.87-2.374 1.674-3.273 1.058-1.183 2.527-1.977 4.186-2.164.942-.107 1.888-.059 2.79.14.863.193 1.65.536 2.326 1.01V9.63c0-.543.358-.905.882-.905h.044c.528 0 .887.362.887.905v4.09c0 .543-.358.905-.887.905h-2.41c-.528 0-.887-.362-.887-.905v-.798c-1.744 1.338-4.028 1.79-6.277 1.264-1.586-.376-2.839-1.23-3.57-2.482-.77-1.326-1.017-2.872-.713-4.482.398-2.1 1.626-3.875 3.5-5.126 1.753-1.179 3.855-1.687 5.962-1.444 2.284.265 4.35 1.334 5.892 3.045 1.34 1.488 2.148 3.378 2.358 5.485.088.88.076 1.745-.034 2.575.404.262.746.587 1.015.973.567.815.883 1.784.942 2.873.11 2.024-.536 3.756-1.86 5.01-1.45 1.373-3.51 2.164-6.35 2.324z" />
+      </svg>
+    ),
+    features: [
+      "Videos & images",
+      "threads.com links",
+      "Public posts",
+      "Image galleries",
     ],
   },
 ];
@@ -82,7 +148,7 @@ const BENEFITS = [
   {
     icon: "⚡",
     title: "Lightning Fast",
-    body: "Videos start downloading in under 2 seconds. No waiting, no buffering — direct from CDN to your device.",
+    body: "Supported media starts downloading without an upload step or permanent server storage.",
   },
   {
     icon: "🚫",
@@ -92,12 +158,12 @@ const BENEFITS = [
   {
     icon: "🔒",
     title: "Private by Default",
-    body: "We don't log URLs, store your videos, or track your downloads. What you save is your business.",
+    body: "We don't permanently store downloaded media. Your download history remains in your browser.",
   },
   {
     icon: "📱",
     title: "Works Everywhere",
-    body: "Mobile, tablet, desktop — the interface adapts perfectly. No app install needed, just your browser.",
+    body: "Mobile, tablet, desktop — the interface adapts perfectly. Install as a PWA for native-like experience.",
   },
   {
     icon: "🆓",
@@ -105,9 +171,19 @@ const BENEFITS = [
     body: "No account, no subscription, no credit card. Just paste the URL and hit download. Always.",
   },
   {
+    icon: "📥",
+    title: "Batch Downloads",
+    body: "Download media from Instagram carousels and save each image from supported photo posts.",
+  },
+  {
+    icon: "🕐",
+    title: "Download History",
+    body: "Your download history is saved locally so videos and images stay organized by date.",
+  },
+  {
     icon: "🎯",
-    title: "High Resolution",
-    body: "Download YouTube in up to 1080p HD. Instagram and TikTok in original uploaded quality.",
+    title: "6 Platforms",
+    body: "Video, audio, and public image posts from six major platforms in one place.",
   },
 ];
 
@@ -115,17 +191,17 @@ const HOW_IT_WORKS = [
   {
     step: "01",
     title: "Copy the URL",
-    body: "Go to YouTube, TikTok, or Instagram and copy the link to any video or reel.",
+    body: "Go to a supported platform and copy the link to a public video, reel, photo, or post.",
   },
   {
     step: "02",
     title: "Paste & Fetch",
-    body: "Paste the URL into SaveIt and click Fetch. We'll grab the title, thumbnail and available formats.",
+    body: "Paste the URL into the matching downloader. SaveIt validates the platform and finds its available media.",
   },
   {
     step: "03",
     title: "Choose & Download",
-    body: "Pick your quality or format, then click Download. Your file saves directly to your device.",
+    body: "Choose a video quality or download individual images directly to your device.",
   },
 ];
 
@@ -133,6 +209,10 @@ const FAQS = [
   {
     q: "Is SaveIt free to use?",
     a: "Yes, completely free. No sign-up, no subscription, no limits.",
+  },
+  {
+    q: "Which platforms are supported?",
+    a: "YouTube supports video and audio. TikTok, Instagram, Facebook, X, and Threads support public videos and image posts.",
   },
   {
     q: "Can I download TikTok videos without watermark?",
@@ -143,16 +223,20 @@ const FAQS = [
     a: "Up to 1080p Full HD. For resolutions ≤720p the download is near-instant via CDN. 1080p requires server-side merging of separate video and audio streams.",
   },
   {
+    q: "Can I download image posts and carousels?",
+    a: "Yes. Public image posts are supported on TikTok, Instagram, Facebook, X, and Threads. Each discovered image has its own download button.",
+  },
+  {
     q: "Does SaveIt work on mobile?",
-    a: "Yes. The site is fully responsive and works great on iOS and Android browsers.",
+    a: "Yes. The site is fully responsive and works great on iOS and Android browsers. You can also install it as a Progressive Web App (PWA) for a native-like experience.",
   },
   {
     q: "Can I download private Instagram posts?",
     a: "No. SaveIt only works with publicly accessible content. Private accounts require authentication which we do not support.",
   },
   {
-    q: "Do you store downloaded videos?",
-    a: "No. Videos are streamed directly to your browser and are never stored on our servers.",
+    q: "Do you store downloaded media?",
+    a: "No. Videos and images are streamed to your browser and are not stored permanently. Download history stays in your browser.",
   },
 ];
 
@@ -160,6 +244,8 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#080808] overflow-x-hidden">
       <Navbar />
+
+      <main id="main-content">
 
       {/* ── HERO ── */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-16">
@@ -190,7 +276,7 @@ export default function LandingPage() {
 
           {/* Headline */}
           <h1 className="animate-fade-up delay-100 font-syne text-5xl sm:text-6xl md:text-7xl font-800 leading-[1.05] tracking-tight">
-            Download any video
+            Download videos & images
             <br />
             <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
               in seconds.
@@ -198,8 +284,8 @@ export default function LandingPage() {
           </h1>
 
           <p className="animate-fade-up delay-200 text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light">
-            YouTube, TikTok, Instagram — save any video to your device, in full
-            quality, completely free. No watermarks, no sign-up.
+            Save videos, audio, and public image posts from six platforms in
+            their available quality. No sign-up required.
           </p>
 
           {/* CTA buttons */}
@@ -219,11 +305,11 @@ export default function LandingPage() {
                   <div className="text-sm font-syne font-600 text-white">
                     {p.name}
                   </div>
-                  <div className="text-xs text-zinc-500">{p.tagline}</div>
+                  <div className="text-xs text-zinc-400">{p.tagline}</div>
                 </div>
                 <svg
                   viewBox="0 0 24 24"
-                  className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all ml-1"
+                  className="w-4 h-4 text-zinc-400 group-hover:text-white group-hover:translate-x-0.5 transition-all ml-1"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -237,7 +323,7 @@ export default function LandingPage() {
           {/* Stats row */}
           <div className="animate-fade-up delay-400 flex items-center justify-center gap-8 pt-4">
             {[
-              ["3 platforms", "supported"],
+              ["6 platforms", "supported"],
               ["1080p", "max quality"],
               ["0 seconds", "sign-up time"],
             ].map(([val, label]) => (
@@ -245,29 +331,29 @@ export default function LandingPage() {
                 <div className="font-syne text-xl font-700 text-white">
                   {val}
                 </div>
-                <div className="text-xs text-zinc-600 mt-0.5">{label}</div>
+                <div className="text-xs text-zinc-400 mt-0.5">{label}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-zinc-700">
+        <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-zinc-400 sm:flex">
           <span className="text-xs">scroll</span>
           <div className="w-px h-8 bg-gradient-to-b from-zinc-700 to-transparent" />
         </div>
       </section>
 
       {/* ── PLATFORM CARDS ── */}
-      <section className="relative px-4 py-24" id="platforms">
+      <section className="content-auto relative px-4 py-24" id="platforms">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 space-y-3">
-            <p className="text-xs font-medium tracking-[0.2em] uppercase text-zinc-600">
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-zinc-400">
               Supported Platforms
             </p>
             <h2 className="font-syne text-3xl sm:text-4xl font-700 text-white">
               Every major platform,{" "}
-              <span className="text-zinc-500">covered.</span>
+              <span className="text-zinc-400">covered.</span>
             </h2>
           </div>
 
@@ -293,7 +379,7 @@ export default function LandingPage() {
                     </div>
                     <svg
                       viewBox="0 0 24 24"
-                      className="w-5 h-5 text-zinc-700 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all"
+                      className="w-5 h-5 text-zinc-400 group-hover:text-white group-hover:translate-x-0.5 transition-all"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="1.5"
@@ -306,7 +392,7 @@ export default function LandingPage() {
                     <h3 className="font-syne text-xl font-700 text-white">
                       {p.name}
                     </h3>
-                    <p className="text-zinc-500 text-sm mt-1 leading-relaxed">
+                    <p className="text-zinc-400 text-sm mt-1 leading-relaxed">
                       {p.description}
                     </p>
                   </div>
@@ -330,7 +416,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="relative px-4 py-24 overflow-hidden">
+      <section className="content-auto relative px-4 py-24 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
@@ -338,11 +424,11 @@ export default function LandingPage() {
 
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16 space-y-3">
-            <p className="text-xs font-medium tracking-[0.2em] uppercase text-zinc-600">
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-zinc-400">
               Simple Process
             </p>
             <h2 className="font-syne text-3xl sm:text-4xl font-700 text-white">
-              Three steps, <span className="text-zinc-500">that's it.</span>
+              Three steps, <span className="text-zinc-400">that&apos;s it.</span>
             </h2>
           </div>
 
@@ -350,19 +436,19 @@ export default function LandingPage() {
             {/* Connector line (desktop) */}
             <div className="hidden sm:block absolute top-10 left-[calc(16.66%+1rem)] right-[calc(16.66%+1rem)] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-            {HOW_IT_WORKS.map((step, i) => (
+            {HOW_IT_WORKS.map((step) => (
               <div
                 key={step.step}
                 className="relative group text-center sm:text-left space-y-4 p-6 rounded-2xl glass hover:bg-white/4 transition-colors duration-300"
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/4 border border-white/8 font-syne font-800 text-2xl text-zinc-700 group-hover:text-zinc-400 transition-colors">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/4 border border-white/8 font-syne font-800 text-2xl text-zinc-400 group-hover:text-white transition-colors">
                   {step.step}
                 </div>
                 <div>
                   <h3 className="font-syne font-600 text-white text-lg">
                     {step.title}
                   </h3>
-                  <p className="text-zinc-500 text-sm mt-1.5 leading-relaxed">
+                  <p className="text-zinc-400 text-sm mt-1.5 leading-relaxed">
                     {step.body}
                   </p>
                 </div>
@@ -373,27 +459,27 @@ export default function LandingPage() {
       </section>
 
       {/* ── BENEFITS ── */}
-      <section className="px-4 py-24" id="features">
+      <section className="content-auto px-4 py-24" id="features">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 space-y-3">
-            <p className="text-xs font-medium tracking-[0.2em] uppercase text-zinc-600">
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-zinc-400">
               Why SaveIt
             </p>
             <h2 className="font-syne text-3xl sm:text-4xl font-700 text-white">
               Built different,{" "}
-              <span className="text-zinc-500">on purpose.</span>
+              <span className="text-zinc-400">on purpose.</span>
             </h2>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {BENEFITS.map((b, i) => (
+            {BENEFITS.map((b) => (
               <div
                 key={b.title}
                 className="group p-6 rounded-2xl border border-white/5 hover:border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-300 space-y-3"
               >
                 <div className="text-3xl">{b.icon}</div>
                 <h3 className="font-syne font-600 text-white">{b.title}</h3>
-                <p className="text-zinc-500 text-sm leading-relaxed">
+                <p className="text-zinc-400 text-sm leading-relaxed">
                   {b.body}
                 </p>
               </div>
@@ -403,10 +489,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="px-4 py-24" id="faq">
+      <section className="content-auto px-4 py-24" id="faq">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16 space-y-3">
-            <p className="text-xs font-medium tracking-[0.2em] uppercase text-zinc-600">
+            <p className="text-xs font-medium tracking-[0.2em] uppercase text-zinc-400">
               FAQ
             </p>
             <h2 className="font-syne text-3xl sm:text-4xl font-700 text-white">
@@ -426,7 +512,7 @@ export default function LandingPage() {
                   </span>
                   <svg
                     viewBox="0 0 24 24"
-                    className="w-4 h-4 text-zinc-600 flex-shrink-0 group-open:rotate-45 transition-transform duration-200"
+                    className="w-4 h-4 text-zinc-400 flex-shrink-0 group-open:rotate-45 transition-transform duration-200"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -444,7 +530,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section className="px-4 py-24">
+      <section className="content-auto px-4 py-24">
         <div className="max-w-2xl mx-auto text-center space-y-6">
           <div className="relative inline-block">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-indigo-600/20 to-violet-600/20 blur-xl" />
@@ -452,7 +538,7 @@ export default function LandingPage() {
               <h2 className="font-syne text-3xl sm:text-4xl font-700 text-white leading-tight">
                 Ready to save
                 <br />
-                your first video?
+                your first download?
               </h2>
               <p className="text-zinc-400 text-sm">
                 Pick a platform and paste your link. Takes less than 5 seconds.
@@ -474,6 +560,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
+      </main>
+
       <footer className="px-4 py-8 border-t border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -486,10 +574,10 @@ export default function LandingPage() {
               SaveIt
             </span>
           </div>
-          <p className="text-xs text-zinc-700 text-center">
-            For personal use only. Respect copyright laws and creators' rights.
+          <p className="text-xs text-zinc-400 text-center">
+            For personal use only. Respect copyright laws and creators&apos; rights.
           </p>
-          <div className="flex items-center gap-4 text-xs text-zinc-700">
+          <div className="flex items-center gap-4 text-xs text-zinc-400">
             <Link
               href="/youtube"
               className="hover:text-zinc-400 transition-colors"
@@ -507,6 +595,24 @@ export default function LandingPage() {
               className="hover:text-zinc-400 transition-colors"
             >
               Instagram
+            </Link>
+            <Link
+              href="/facebook"
+              className="hover:text-zinc-400 transition-colors"
+            >
+              Facebook
+            </Link>
+            <Link
+              href="/twitter"
+              className="hover:text-zinc-400 transition-colors"
+            >
+              X
+            </Link>
+            <Link
+              href="/threads"
+              className="hover:text-zinc-400 transition-colors"
+            >
+              Threads
             </Link>
           </div>
         </div>

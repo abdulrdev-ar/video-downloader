@@ -1,4 +1,14 @@
 import YTDlpWrap from "yt-dlp-wrap";
+import { writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { isValidInstagramUrl as validateInstagramUrl } from "@/core/utils/url-validators";
+import {
+  getInstagramMediaAssets,
+  getSocialImageAssets,
+  type InstagramMediaAssets,
+  type SocialImageAsset,
+} from "./social-image.service";
 
 export interface InstagramVideoInfo {
   id: string;
@@ -15,6 +25,7 @@ export interface InstagramVideoInfo {
   formats: InstagramFormat[];
   /** true if this post has no downloadable video (image-only post) */
   hasNoVideo: boolean;
+  images: SocialImageAsset[];
 }
 
 export interface InstagramEntry {
@@ -26,6 +37,8 @@ export interface InstagramEntry {
   index: number;
   /** true = this slide is a video, false = image only */
   isVideo: boolean;
+  /** Direct fallback download URL for video entries extracted outside yt-dlp */
+  downloadPath?: string;
 }
 
 export interface InstagramFormat {
@@ -40,18 +53,44 @@ export interface InstagramFormat {
 }
 
 const getBinaryPath = () => process.env.YTDLP_BINARY_PATH ?? "yt-dlp";
+let generatedInstagramCookiesPath: string | null = null;
+
+/**
+ * Instagram often returns a Reel cover to anonymous requests while withholding
+ * the actual video stream. Reuse the shared social cookie secret for yt-dlp,
+ * with an Instagram-only secret available when a separate session is desired.
+ */
+function getInstagramCookieArgs(): string[] {
+  const configuredPath = process.env.INSTAGRAM_COOKIES_PATH?.trim();
+  if (configuredPath) return ["--cookies", configuredPath];
+
+  const encodedCookies =
+    process.env.INSTAGRAM_COOKIES_BASE64?.trim() ||
+    process.env.SOCIAL_COOKIES_BASE64?.trim();
+  if (!encodedCookies) return [];
+
+  generatedInstagramCookiesPath ??= join(tmpdir(), "instagram-cookies.txt");
+  writeFileSync(
+    generatedInstagramCookiesPath,
+    Buffer.from(encodedCookies, "base64"),
+    { mode: 0o600 },
+  );
+  return ["--cookies", generatedInstagramCookiesPath];
+}
 
 export function cleanInstagramUrl(rawUrl: string): string {
   try {
     const u = new URL(rawUrl);
-    if (!u.hostname.includes("instagram.com")) return rawUrl;
+    if (u.hostname !== "instagram.com" && !u.hostname.endsWith(".instagram.com")) {
+      return rawUrl;
+    }
     return `https://www.instagram.com${u.pathname}`;
   } catch {}
   return rawUrl;
 }
 
 export function isValidInstagramUrl(url: string): boolean {
-  return /instagram\.com\/(p|reel|tv|reels|stories)\/[\w\-]+/.test(url);
+  return validateInstagramUrl(url);
 }
 
 function withTimeout<T>(
@@ -88,6 +127,35 @@ function hasVideoFormats(formats: any[]): boolean {
   return formats.some((f: any) => f.vcodec && f.vcodec !== "none");
 }
 
+function isVideoUrl(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  try {
+    const url = new URL(value);
+    return /\.(?:mp4|m4v|mov|webm|m3u8)(?:$|[?#])/i.test(url.pathname);
+  } catch {
+    return /\.(?:mp4|m4v|mov|webm|m3u8)(?:$|[?#])/i.test(value);
+  }
+}
+
+function isVideoEntry(entry: any): boolean {
+  const requestedDownloads = Array.isArray(entry.requested_downloads)
+    ? entry.requested_downloads
+    : [];
+
+  return (
+    hasVideoFormats(entry.formats ?? []) ||
+    Boolean(entry.duration) ||
+    entry.ext === "mp4" ||
+    entry.media_type === "video" ||
+    entry.__typename === "GraphVideo" ||
+    isVideoUrl(entry.url) ||
+    isVideoUrl(entry.video_url) ||
+    requestedDownloads.some(
+      (download: any) => download?.ext === "mp4" || isVideoUrl(download?.url),
+    )
+  );
+}
+
 function mapFormat(f: any): InstagramFormat {
   return {
     format_id: f.format_id,
@@ -103,10 +171,39 @@ function mapFormat(f: any): InstagramFormat {
   };
 }
 
+function mapMediaAssetEntries(
+  media: InstagramMediaAssets | null,
+): InstagramEntry[] {
+  const items = media?.items ?? [];
+  const hasVideo = items.some((item) => item.type === "video");
+  if (!hasVideo) return [];
+
+  return (
+    items.map((item, index) => ({
+      id: `${item.type}-${item.index}`,
+      title: `Slide ${index + 1}`,
+      thumbnail: item.type === "image" ? item.previewPath : "",
+      duration: 0,
+      formats: [],
+      index,
+      isVideo: item.type === "video",
+      downloadPath: item.type === "video" ? item.downloadPath : undefined,
+    }))
+  );
+}
+
 const IG_HEADERS = [
   "--add-header",
   "User-Agent:Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
 ];
+
+function reelVideoUnavailableError(cause: unknown): Error {
+  const detail = cause instanceof Error ? cause.message : String(cause ?? "");
+  console.warn("[instagram:getVideoInfo] Reel video unavailable:", detail);
+  return new Error(
+    "Instagram confirmed this link is a Reel, but did not expose its downloadable video stream. Refresh INSTAGRAM_COOKIES_BASE64 (or SOCIAL_COOKIES_BASE64) with a current Instagram cookies.txt, then try Fetch again.",
+  );
+}
 
 export class InstagramDownloaderService {
   private ytDlp: YTDlpWrap;
@@ -118,6 +215,8 @@ export class InstagramDownloaderService {
   async getVideoInfo(rawUrl: string): Promise<InstagramVideoInfo> {
     const url = cleanInstagramUrl(rawUrl);
     const mediaType = inferMediaType(url);
+    const imagesPromise = getSocialImageAssets(url, "instagram").catch(() => []);
+    const mediaPromise = getInstagramMediaAssets(url).catch(() => null);
 
     // Stories always require login — fail fast with a clear message
     if (mediaType === "story") {
@@ -126,20 +225,95 @@ export class InstagramDownloaderService {
       );
     }
 
-    const jsonStr = await withTimeout(
-      this.ytDlp.execPromise([
-        url,
-        "-J",
-        "--skip-download",
-        "--no-warnings",
-        "--no-check-certificate",
-        "--extractor-retries",
-        "2",
-        ...IG_HEADERS,
-      ]),
-      45_000,
-      "instagram:getVideoInfo",
-    );
+    const media = await mediaPromise;
+    const mediaEntries = mapMediaAssetEntries(media);
+    const hasMediaVideo = mediaEntries.some((entry) => entry.isVideo);
+    // Instaloader/gallery-dl can return a Reel's cover image before exposing its
+    // video URL. Do not let that image-only fallback hide the actual Reel from
+    // yt-dlp, which is the more reliable source for a single Reel video.
+    const shouldInspectReelWithYtDlp = mediaType === "reel" && !hasMediaVideo;
+
+    if (
+      media &&
+      (media.items.length || media.images.length) &&
+      !shouldInspectReelWithYtDlp
+    ) {
+      // The image returned alongside a direct Reel video is its cover. Keep it
+      // for the header thumbnail, but never show it as an image-only download.
+      const displayImages =
+        mediaType === "reel" && hasMediaVideo ? [] : media.images;
+      return {
+        id: url.split("/").filter(Boolean).at(-1) ?? "",
+        title: hasMediaVideo ? "Instagram carousel" : "Instagram image post",
+        description: "",
+        thumbnail:
+          media.images[0]?.previewPath ??
+          mediaEntries.find((entry) => entry.thumbnail)?.thumbnail ??
+          "",
+        duration: 0,
+        uploader: "Unknown",
+        uploader_id: "",
+        timestamp: 0,
+        like_count: 0,
+        media_type: mediaType,
+        entries: mediaEntries,
+        formats: [],
+        hasNoVideo: !hasMediaVideo,
+        images: displayImages,
+      };
+    }
+
+    let jsonStr: string;
+    try {
+      jsonStr = await withTimeout(
+        this.ytDlp.execPromise([
+          url,
+          "-J",
+          "--skip-download",
+          "--no-warnings",
+          "--no-check-certificate",
+          "--extractor-retries",
+          "2",
+          ...getInstagramCookieArgs(),
+          ...IG_HEADERS,
+          "--add-header",
+          "Referer:https://www.instagram.com/",
+        ]),
+        45_000,
+        "instagram:getVideoInfo",
+      );
+    } catch (error) {
+      const entries = mapMediaAssetEntries(media);
+      const images = media?.images.length ? media.images : await imagesPromise;
+      const hasFallbackVideo = entries.some((entry) => entry.isVideo);
+      // A Reel is always video. Returning its cover as an image-only post hides
+      // the real extractor failure and gives users a false successful result.
+      if (mediaType === "reel" && !hasFallbackVideo) {
+        throw reelVideoUnavailableError(error);
+      }
+      if (!images.length && !entries.some((entry) => entry.isVideo)) throw error;
+      return {
+        id: url.split("/").filter(Boolean).at(-1) ?? "",
+        title: entries.some((entry) => entry.isVideo)
+          ? "Instagram carousel"
+          : "Instagram image post",
+        description: "",
+        thumbnail:
+          images[0]?.previewPath ??
+          entries.find((entry) => entry.thumbnail)?.thumbnail ??
+          "",
+        duration: 0,
+        uploader: "Unknown",
+        uploader_id: "",
+        timestamp: 0,
+        like_count: 0,
+        media_type: mediaType,
+        entries,
+        formats: [],
+        hasNoVideo: !entries.some((entry) => entry.isVideo),
+        images,
+      };
+    }
 
     let raw: any;
     try {
@@ -151,11 +325,13 @@ export class InstagramDownloaderService {
 
     // Carousel / playlist
     if (raw._type === "playlist" && Array.isArray(raw.entries)) {
+      let videoAssetIndex = 0;
       const entries: InstagramEntry[] = raw.entries
         .filter((e: any) => e != null)
         .map((e: any, i: number) => {
           const entryFormats = e.formats ?? [];
-          const isVideo = hasVideoFormats(entryFormats);
+          const isVideo = isVideoEntry(e);
+          const fallbackVideo = isVideo ? media?.videos[videoAssetIndex++] : null;
           return {
             id: e.id ?? `entry_${i}`,
             title: e.title ?? `Slide ${i + 1}`,
@@ -173,11 +349,29 @@ export class InstagramDownloaderService {
               ),
             index: i,
             isVideo,
+            downloadPath: fallbackVideo?.downloadPath,
           };
         });
 
       // Check if ANY entry has video
       const anyVideo = entries.some((e) => e.isVideo);
+      const fallbackEntries = mapMediaAssetEntries(media);
+      const finalEntries =
+        !anyVideo && fallbackEntries.some((entry) => entry.isVideo)
+          ? fallbackEntries
+          : entries;
+      const images = media?.images.length ? media.images : await imagesPromise;
+      // A Reel cover can be discovered as an image by fallback extractors. Once
+      // yt-dlp confirms video media, do not present that cover as a separately
+      // downloadable image.
+      const displayImages =
+        mediaType === "reel" && anyVideo && !hasMediaVideo ? [] : images;
+
+      if (mediaType === "reel" && !finalEntries.some((entry) => entry.isVideo)) {
+        throw reelVideoUnavailableError(
+          new Error("yt-dlp returned no video entries for this Reel"),
+        );
+      }
 
       return {
         id: raw.id ?? "",
@@ -192,9 +386,10 @@ export class InstagramDownloaderService {
         timestamp: raw.timestamp ?? 0,
         like_count: Number(raw.like_count) || 0,
         media_type: mediaType,
-        entries,
+        entries: finalEntries,
         formats: [],
-        hasNoVideo: !anyVideo,
+        hasNoVideo: !finalEntries.some((entry) => entry.isVideo),
+        images: displayImages,
       };
     }
 
@@ -204,7 +399,21 @@ export class InstagramDownloaderService {
       .map(mapFormat)
       .sort((a: InstagramFormat, b: InstagramFormat) => b.quality - a.quality);
 
-    const hasVideo = formats.length > 0;
+    // Some Instagram extractor responses provide a direct MP4 URL without a
+    // populated formats array. Treat that response as video too.
+    const hasVideo = formats.length > 0 || isVideoEntry(raw);
+    const fallbackEntries = mapMediaAssetEntries(media);
+    const images = media?.images.length ? media.images : await imagesPromise;
+    const shouldUseFallbackCarousel =
+      fallbackEntries.length > 1 && fallbackEntries.some((entry) => entry.isVideo);
+    const displayImages =
+      mediaType === "reel" && hasVideo && !hasMediaVideo ? [] : images;
+
+    if (mediaType === "reel" && !hasVideo && !shouldUseFallbackCarousel) {
+      throw reelVideoUnavailableError(
+        new Error("yt-dlp returned no video formats for this Reel"),
+      );
+    }
 
     return {
       id: raw.id ?? "",
@@ -219,9 +428,13 @@ export class InstagramDownloaderService {
       timestamp: raw.timestamp ?? 0,
       like_count: Number(raw.like_count) || 0,
       media_type: mediaType,
-      entries: [],
+      entries: shouldUseFallbackCarousel ? fallbackEntries : [],
       formats,
-      hasNoVideo: !hasVideo,
+      hasNoVideo:
+        shouldUseFallbackCarousel
+          ? !fallbackEntries.some((entry) => entry.isVideo)
+          : !hasVideo,
+      images: displayImages,
     };
   }
 
@@ -234,11 +447,12 @@ export class InstagramDownloaderService {
     const args = [
       url,
       "-f",
-      "bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/best",
+      "best[ext=mp4][vcodec^=avc1][acodec^=mp4a]/best[ext=mp4]/best",
       "-o",
       "-",
       "--no-warnings",
       "--no-check-certificate",
+      ...getInstagramCookieArgs(),
       ...IG_HEADERS,
       "--add-header",
       "Referer:https://www.instagram.com/",

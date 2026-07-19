@@ -1,24 +1,19 @@
 "use client";
 import { useState, useTransition } from "react";
 import DownloaderShell from "@/components/downloader-shell";
+import Spinner from "@/components/ui/spinner";
+import SmartUrlInput from "@/components/smart-url-input";
+import UrlValidationError from "@/components/url-validation-error";
+import ImageMediaGallery from "@/components/image-media-gallery";
+import BatchProgress from "@/components/batch-progress";
 import {
   getTikTokInfoAction,
   prepareTikTokDownloadAction,
 } from "@/actions/tiktok-downloader.action";
 import type { TikTokVideoInfo } from "@/core/services/tiktok.service";
-
-function fmtDuration(s: number) {
-  const m = Math.floor(s / 60),
-    sec = Math.floor(s % 60);
-  return `${m}:${String(sec).padStart(2, "0")}`;
-}
-function fmtCount(n: number) {
-  return n >= 1e6
-    ? `${(n / 1e6).toFixed(1)}M`
-    : n >= 1e3
-      ? `${(n / 1e3).toFixed(1)}K`
-      : String(n);
-}
+import { fmtDuration, fmtCount } from "@/core/utils/format-helpers";
+import { useDownloadHistory } from "@/core/hooks/use-download-history";
+import { useBatchDownload } from "@/core/hooks/use-batch-download";
 
 const VARIANTS = [
   {
@@ -31,26 +26,6 @@ const VARIANTS = [
   { value: "audio", icon: "🎧", label: "Audio Only", sub: "MP3" },
 ] as const;
 
-function Spinner() {
-  return (
-    <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v8z"
-      />
-    </svg>
-  );
-}
-
 export default function TikTokDownloader() {
   const [url, setUrl] = useState("");
   const [info, setInfo] = useState<TikTokVideoInfo | null>(null);
@@ -60,7 +35,27 @@ export default function TikTokDownloader() {
   );
   const [downloading, setDownloading] = useState(false);
   const [isPending, start] = useTransition();
-  const loading = isPending || downloading;
+  const { addEntry } = useDownloadHistory();
+  const batch = useBatchDownload({
+    onComplete: (item) => {
+      addEntry({
+        url: item.url,
+        platform: "tiktok",
+        title: item.title,
+        thumbnail: info?.thumbnail ?? "",
+        quality: variant,
+        filename: item.filename ?? "tiktok.mp4",
+        status: "completed",
+      });
+    },
+  });
+  const loading = isPending || downloading || batch.active;
+
+  const handleUrlChange = (nextUrl: string) => {
+    setUrl(nextUrl);
+    setError(null);
+    setInfo(null);
+  };
 
   const handleFetch = () => {
     setError(null);
@@ -83,13 +78,14 @@ export default function TikTokDownloader() {
         setDownloading(false);
         return;
       }
-      const a = document.createElement("a");
-      a.href = r.downloadPath;
-      a.download = r.filename ?? "tiktok.mp4";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      batch.addToQueue([{
+        url,
+        title: info.title,
+        filename: r.filename ?? "tiktok.mp4",
+        downloadPath: r.downloadPath,
+      }]);
       setDownloading(false);
+      void batch.startBatch();
     });
   };
 
@@ -98,6 +94,20 @@ export default function TikTokDownloader() {
       accentClass="text-pink-400"
       glowClass="bg-pink-600/5"
       borderGlow="border-pink-500/10"
+      batchSlot={
+        <BatchProgress
+          items={batch.items}
+          active={batch.active}
+          minimized={batch.minimized}
+          onToggleMinimize={() => batch.setMinimized(!batch.minimized)}
+          onCancel={batch.cancelAll}
+          onRetryFailed={batch.retryFailed}
+          onClearCompleted={batch.clearCompleted}
+          completed={batch.completed}
+          failed={batch.failed}
+          total={batch.total}
+        />
+      }
     >
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -114,50 +124,44 @@ export default function TikTokDownloader() {
             TikTok Downloader
           </h1>
           <p className="text-xs text-zinc-500">
-            No watermark · All regions · Audio extract
+            Videos · Photo posts · No watermark · Audio
           </p>
         </div>
       </div>
 
       {/* Input */}
-      <div className="relative group">
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-pink-500/10 to-cyan-500/10 opacity-0 group-focus-within:opacity-100 blur-xl transition-opacity pointer-events-none" />
-        <div className="relative flex gap-2 glass rounded-2xl p-2 border border-white/6 group-focus-within:border-pink-500/30 transition-colors">
-          <input
-            type="url"
-            placeholder="Paste TikTok URL..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === "Enter" && !loading && url.trim() && handleFetch()
-            }
-            className="flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none"
-          />
-          <button
-            onClick={handleFetch}
-            disabled={loading || !url.trim()}
-            className="px-4 py-2 rounded-xl text-white text-sm font-syne font-600 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity shadow-lg flex-shrink-0"
-            style={{ background: "linear-gradient(135deg,#ff2d6b,#00e5ff)" }}
-          >
-            {isPending && !downloading ? (
-              <span className="flex items-center gap-1.5">
-                <Spinner /> Fetching
-              </span>
-            ) : (
-              "Fetch"
-            )}
-          </button>
-        </div>
-      </div>
+      <SmartUrlInput
+        platformName="TikTok"
+        placeholder="Paste TikTok URL..."
+        value={url}
+        onValueChange={handleUrlChange}
+        onFetch={handleFetch}
+        disabled={loading}
+        fetching={isPending && !downloading}
+        glowClassName="from-pink-500/10 to-cyan-500/10"
+        focusBorderClassName="group-focus-within:border-pink-500/30"
+        fetchButtonClassName="text-white shadow-pink-500/20"
+        fetchButtonStyle={{ background: "linear-gradient(135deg,#ff2d6b,#00e5ff)" }}
+      />
 
       <p className="text-xs text-zinc-700 text-center">
-        tiktok.com/@user/video/... · vm.tiktok.com · vt.tiktok.com
+        tiktok.com/@user/video/... · /photo/... · vm.tiktok.com
       </p>
 
+      <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-pink-500/8 border border-pink-500/20 text-pink-300/80 text-xs leading-relaxed">
+        <span aria-hidden="true">i</span>
+        <span>
+          TikTok photo links use temporary image URLs. If a preview fails to
+          load, click Fetch again to refresh the image links.
+        </span>
+      </div>
+
       {error && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-red-500/8 border border-red-500/20 text-red-400 text-sm">
-          <span className="flex-shrink-0">⚠</span> {error}
-        </div>
+        <UrlValidationError
+          error={error}
+          inputUrl={url}
+          expectedPlatform="tiktok"
+        />
       )}
 
       {info && (
@@ -202,7 +206,26 @@ export default function TikTokDownloader() {
           </div>
 
           {/* Variant selector */}
-          <div className="space-y-2">
+          <ImageMediaGallery
+            images={info.images}
+            platformLabel="TikTok"
+            onQueueImageDownload={(image, format) => {
+              const extension = format === "original" ? image.extension : format;
+              const downloadPath =
+                format === "original"
+                  ? image.downloadPath
+                  : `${image.downloadPath}&format=${format}`;
+              batch.addToQueue([{
+                url: downloadPath,
+                title: `TikTok image ${image.index + 1}`,
+                filename: `tiktok-${image.index + 1}.${extension}`,
+                downloadPath,
+              }]);
+              void batch.startBatch();
+            }}
+          />
+
+          {!info.hasNoVideo && <div className="space-y-2">
             <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider">
               Download as
             </p>
@@ -223,10 +246,10 @@ export default function TikTokDownloader() {
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
 
           {/* Download */}
-          <button
+          {!info.hasNoVideo && <button
             onClick={handleDownload}
             disabled={loading}
             className="w-full py-3.5 rounded-2xl text-white font-syne font-600 text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-xl flex items-center justify-center gap-2"
@@ -248,7 +271,7 @@ export default function TikTokDownloader() {
                 Download {VARIANTS.find((v) => v.value === variant)?.label}
               </>
             )}
-          </button>
+          </button>}
         </div>
       )}
     </DownloaderShell>

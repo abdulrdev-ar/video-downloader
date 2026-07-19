@@ -1,33 +1,23 @@
 "use client";
 import { useState, useTransition } from "react";
 import DownloaderShell from "@/components/downloader-shell";
+import Spinner from "@/components/ui/spinner";
+import SmartUrlInput from "@/components/smart-url-input";
+import UrlValidationError from "@/components/url-validation-error";
+import BatchProgress from "@/components/batch-progress";
 import {
   getVideoInfoAction,
   prepareDownloadAction,
+  preparePlaylistDownloadsAction,
 } from "@/actions/youtube-downloader.action";
-import type { VideoInfo, VideoFormat } from "@/core/services/youtube.service";
-
-function fmtDuration(s: number) {
-  const h = Math.floor(s / 3600),
-    m = Math.floor((s % 3600) / 60),
-    sec = s % 60;
-  return h > 0
-    ? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
-    : `${m}:${String(sec).padStart(2, "0")}`;
-}
-function fmtBytes(b: number | null) {
-  if (!b) return null;
-  return b > 1048576
-    ? `${(b / 1048576).toFixed(0)}MB`
-    : `${(b / 1024).toFixed(0)}KB`;
-}
-function fmtCount(n: number) {
-  return n >= 1e6
-    ? `${(n / 1e6).toFixed(1)}M`
-    : n >= 1e3
-      ? `${(n / 1e3).toFixed(1)}K`
-      : String(n);
-}
+import type {
+  VideoInfo,
+  YoutubePlaylistInfo,
+  YoutubePlaylistEntry,
+} from "@/core/services/youtube.service";
+import { fmtDuration, fmtBytes, fmtCount } from "@/core/utils/format-helpers";
+import { useDownloadHistory } from "@/core/hooks/use-download-history";
+import { useBatchDownload } from "@/core/hooks/use-batch-download";
 
 const QUALITY_PRESETS = [
   { value: "best", label: "Best", sub: "Auto", fast: true },
@@ -38,44 +28,52 @@ const QUALITY_PRESETS = [
   { value: "audio", label: "Audio", sub: "MP3", fast: true },
 ];
 
-function Spinner() {
-  return (
-    <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v8z"
-      />
-    </svg>
-  );
-}
-
 export default function YoutubeDownloader() {
   const [url, setUrl] = useState("");
   const [info, setInfo] = useState<VideoInfo | null>(null);
+  const [playlist, setPlaylist] = useState<YoutubePlaylistInfo | null>(null);
+  const [visiblePlaylistItems, setVisiblePlaylistItems] = useState(50);
   const [error, setError] = useState<string | null>(null);
   const [quality, setQuality] = useState("best");
   const [formatId, setFormatId] = useState<string | undefined>();
   const [downloading, setDownloading] = useState(false);
   const [isPending, start] = useTransition();
+  const { addEntry } = useDownloadHistory();
+  const batch = useBatchDownload({
+    onComplete: (item) => {
+      addEntry({
+        url: item.url,
+        platform: "youtube",
+        title: item.title,
+        thumbnail: "",
+        quality,
+        filename: item.filename ?? "youtube-download",
+        status: "completed",
+      });
+    },
+  });
 
-  const loading = isPending || downloading;
+  const loading = isPending || downloading || batch.active;
+
+  const handleUrlChange = (nextUrl: string) => {
+    setUrl(nextUrl);
+    setError(null);
+    setInfo(null);
+    setPlaylist(null);
+    setVisiblePlaylistItems(50);
+    setFormatId(undefined);
+  };
 
   const handleFetch = () => {
     setError(null);
     setInfo(null);
+    setPlaylist(null);
+    setVisiblePlaylistItems(50);
     setFormatId(undefined);
     start(async () => {
       const r = await getVideoInfoAction(url);
-      if (r.success && r.data) setInfo(r.data);
+      if (r.success && r.playlist) setPlaylist(r.playlist);
+      else if (r.success && r.data) setInfo(r.data);
       else setError(r.error ?? "Unknown error");
     });
   };
@@ -91,13 +89,66 @@ export default function YoutubeDownloader() {
         setDownloading(false);
         return;
       }
-      const a = document.createElement("a");
-      a.href = r.downloadPath;
-      a.download = r.filename ?? "video.mp4";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      batch.addToQueue([{
+        url,
+        title: info.title,
+        filename: r.filename ?? "video.mp4",
+        downloadPath: r.downloadPath,
+      }]);
       setDownloading(false);
+      void batch.startBatch();
+    });
+  };
+
+  const queuePlaylistEntry = (entry: YoutubePlaylistEntry) => {
+    setError(null);
+    setDownloading(true);
+    start(async () => {
+      const result = await prepareDownloadAction(entry.url, quality, entry.title);
+      if (!result.success || !result.downloadPath) {
+        setError(result.error ?? "Failed to prepare playlist item");
+        setDownloading(false);
+        return;
+      }
+      batch.addToQueue([{
+        url: entry.url,
+        title: entry.title,
+        filename: result.filename ?? "youtube-download",
+        downloadPath: result.downloadPath,
+      }]);
+      setDownloading(false);
+      void batch.startBatch();
+    });
+  };
+
+  const queueWholePlaylist = () => {
+    if (!playlist) return;
+    setError(null);
+    setDownloading(true);
+    start(async () => {
+      const result = await preparePlaylistDownloadsAction(
+        playlist.entries.map((entry) => ({ url: entry.url, title: entry.title })),
+        quality,
+      );
+      if (!result.success || !result.items) {
+        setError(result.error ?? "Failed to prepare playlist");
+        setDownloading(false);
+        return;
+      }
+      batch.addToQueue(
+        result.items.flatMap((item, index) =>
+          item.success && item.downloadPath
+            ? [{
+                url: playlist.entries[index].url,
+                title: playlist.entries[index].title,
+                filename: item.filename ?? `youtube-${index + 1}`,
+                downloadPath: item.downloadPath,
+              }]
+            : [],
+        ),
+      );
+      setDownloading(false);
+      void batch.startBatch();
     });
   };
 
@@ -108,6 +159,20 @@ export default function YoutubeDownloader() {
       accentClass="text-red-400"
       glowClass="bg-red-600/5"
       borderGlow="border-red-500/10"
+      batchSlot={
+        <BatchProgress
+          items={batch.items}
+          active={batch.active}
+          minimized={batch.minimized}
+          onToggleMinimize={() => batch.setMinimized(!batch.minimized)}
+          onCancel={batch.cancelAll}
+          onRetryFailed={batch.retryFailed}
+          onClearCompleted={batch.clearCompleted}
+          completed={batch.completed}
+          failed={batch.failed}
+          total={batch.total}
+        />
+      }
     >
       <div className="space-y-1">
         <div className="flex items-center gap-3">
@@ -121,44 +186,124 @@ export default function YoutubeDownloader() {
               YouTube Downloader
             </h1>
             <p className="text-xs text-zinc-500">
-              Up to 1080p HD · Audio · Shorts
+              Up to 1080p HD · Audio · Shorts · Playlists
             </p>
           </div>
         </div>
       </div>
 
-      <div className="relative group">
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500/10 to-orange-500/10 opacity-0 group-focus-within:opacity-100 blur-xl transition-opacity pointer-events-none" />
-        <div className="relative flex gap-2 glass rounded-2xl p-2 border border-white/6 group-focus-within:border-red-500/30 transition-colors">
-          <input
-            type="url"
-            placeholder="Paste YouTube URL..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === "Enter" && !loading && url.trim() && handleFetch()
-            }
-            className="flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none"
-          />
-          <button
-            onClick={handleFetch}
-            disabled={loading || !url.trim()}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-syne font-600 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity shadow-lg shadow-red-500/20 flex-shrink-0"
-          >
-            {isPending && !downloading ? (
-              <span className="flex items-center gap-1.5">
-                <Spinner /> Fetching
-              </span>
-            ) : (
-              "Fetch"
-            )}
-          </button>
-        </div>
-      </div>
+      <SmartUrlInput
+        platformName="YouTube"
+        placeholder="Paste YouTube URL..."
+        value={url}
+        onValueChange={handleUrlChange}
+        onFetch={handleFetch}
+        disabled={loading}
+        fetching={isPending && !downloading}
+        glowClassName="from-red-500/10 to-orange-500/10"
+        focusBorderClassName="group-focus-within:border-red-500/30"
+        fetchButtonClassName="bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-red-500/20"
+      />
 
       {error && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-red-500/8 border border-red-500/20 text-red-400 text-sm">
-          <span className="text-base flex-shrink-0">⚠</span> {error}
+        <UrlValidationError
+          error={error}
+          inputUrl={url}
+          expectedPlatform="youtube"
+        />
+      )}
+
+      {playlist && (
+        <div className="glass rounded-3xl border border-white/6 overflow-hidden space-y-4 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <span className="text-[10px] uppercase tracking-wider text-red-400">
+                YouTube playlist
+              </span>
+              <h2 className="mt-1 font-syne font-600 text-white line-clamp-2">
+                {playlist.title}
+              </h2>
+              <p className="mt-1 text-xs text-zinc-500">
+                {playlist.entries.length} accessible videos · {playlist.uploader}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider">
+              Download format
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+              {QUALITY_PRESETS.map((preset) => (
+                <button
+                  key={preset.value}
+                  onClick={() => setQuality(preset.value)}
+                  className={`rounded-xl border py-2 px-1 text-center transition-colors ${
+                    quality === preset.value
+                      ? "border-red-500/50 bg-red-500/10 text-white"
+                      : "border-white/6 text-zinc-500 hover:border-white/12"
+                  }`}
+                >
+                  <span className="block text-xs font-syne font-600">{preset.label}</span>
+                  <span className="block text-[9px] opacity-60">{preset.sub}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={queueWholePlaylist}
+            disabled={loading || batch.active}
+            className="w-full rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 py-3 text-sm font-syne font-600 text-white disabled:opacity-40"
+          >
+            {downloading ? "Preparing playlist..." : `Download all ${playlist.entries.length} videos`}
+          </button>
+
+          <p className="text-[10px] leading-relaxed text-zinc-600">
+            Playlist downloads run one at a time. Files are prepared on the server so progress can be shown before each save starts.
+            Your browser may ask permission to save multiple files.
+          </p>
+
+          <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
+            {playlist.entries.slice(0, visiblePlaylistItems).map((entry, index) => (
+              <div
+                key={`${entry.id}-${index}`}
+                className="flex items-center gap-3 rounded-xl border border-white/5 bg-black/20 p-2.5"
+              >
+                <span className="w-7 flex-shrink-0 text-right text-[10px] text-zinc-700">
+                  {index + 1}
+                </span>
+                <img
+                  src={entry.thumbnail}
+                  alt=""
+                  loading="lazy"
+                  className="h-12 w-20 flex-shrink-0 rounded-lg bg-zinc-900 object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-xs text-zinc-200">{entry.title}</p>
+                  <p className="mt-0.5 text-[10px] text-zinc-600">
+                    {entry.duration > 0 ? fmtDuration(entry.duration) : "Unknown duration"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => queuePlaylistEntry(entry)}
+                  disabled={loading}
+                  className="flex-shrink-0 rounded-lg border border-white/8 px-2.5 py-2 text-[10px] text-zinc-300 hover:bg-white/5 disabled:opacity-40"
+                >
+                  Download
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {visiblePlaylistItems < playlist.entries.length && (
+            <button
+              onClick={() => setVisiblePlaylistItems((count) => count + 50)}
+              className="w-full rounded-xl border border-white/6 py-2 text-xs text-zinc-400 hover:bg-white/5"
+            >
+              Show 50 more
+            </button>
+          )}
         </div>
       )}
 

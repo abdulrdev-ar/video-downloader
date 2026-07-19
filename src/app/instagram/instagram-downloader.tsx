@@ -1,6 +1,11 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import DownloaderShell from "@/components/downloader-shell";
+import Spinner from "@/components/ui/spinner";
+import SmartUrlInput from "@/components/smart-url-input";
+import UrlValidationError from "@/components/url-validation-error";
+import ImageMediaGallery from "@/components/image-media-gallery";
+import BatchProgress from "@/components/batch-progress";
 import {
   getInstagramInfoAction,
   prepareInstagramDownloadAction,
@@ -9,20 +14,9 @@ import type {
   InstagramVideoInfo,
   InstagramEntry,
 } from "@/core/services/instagram.service";
-
-function fmtDuration(s: number) {
-  if (!s) return "";
-  const m = Math.floor(s / 60),
-    sec = Math.floor(s % 60);
-  return `${m}:${String(sec).padStart(2, "0")}`;
-}
-function fmtCount(n: number) {
-  return n >= 1e6
-    ? `${(n / 1e6).toFixed(1)}M`
-    : n >= 1e3
-      ? `${(n / 1e3).toFixed(1)}K`
-      : String(n);
-}
+import { fmtDuration, fmtCount } from "@/core/utils/format-helpers";
+import { useDownloadHistory } from "@/core/hooks/use-download-history";
+import { useBatchDownload } from "@/core/hooks/use-batch-download";
 
 const MT_ICON: Record<string, string> = {
   reel: "🎬",
@@ -30,26 +24,6 @@ const MT_ICON: Record<string, string> = {
   igtv: "📺",
   story: "⭕",
 };
-
-function Spinner() {
-  return (
-    <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v8z"
-      />
-    </svg>
-  );
-}
 
 const IG_GRADIENT = "linear-gradient(135deg,#f9a825,#e91e8c,#9c27b0)";
 
@@ -61,7 +35,27 @@ export default function InstagramDownloader() {
     number | "single" | null
   >(null);
   const [isPending, start] = useTransition();
-  const loading = isPending || downloadingIdx !== null;
+  const { addEntry } = useDownloadHistory();
+  const batch = useBatchDownload({
+    onComplete: (item) => {
+      addEntry({
+        url: item.url,
+        platform: "instagram",
+        title: item.title,
+        thumbnail: info?.thumbnail ?? "",
+        quality: "best",
+        filename: item.filename ?? "instagram.mp4",
+        status: "completed",
+      });
+    },
+  });
+  const loading = isPending || downloadingIdx !== null || batch.active;
+
+  const handleUrlChange = (nextUrl: string) => {
+    setUrl(nextUrl);
+    setError(null);
+    setInfo(null);
+  };
 
   const handleFetch = () => {
     setError(null);
@@ -77,34 +71,109 @@ export default function InstagramDownloader() {
     if (!info) return;
     setError(null);
     setDownloadingIdx(entryIndex !== undefined ? entryIndex : "single");
+    const entry =
+      entryIndex !== undefined
+        ? info.entries.find((candidate) => candidate.index === entryIndex)
+        : undefined;
     const title =
       entryIndex !== undefined
         ? `${info.uploader_id || info.uploader}-slide${entryIndex + 1}`
         : info.title || info.uploader_id || "instagram";
     start(async () => {
+      if (entry?.downloadPath) {
+        const filename = `${title}.mp4`;
+        batch.addToQueue([{
+          url,
+          title,
+          filename,
+          downloadPath: entry.downloadPath,
+        }]);
+        setDownloadingIdx(null);
+        void batch.startBatch();
+        return;
+      }
+
       const r = await prepareInstagramDownloadAction(url, title, entryIndex);
       if (!r.success || !r.downloadPath) {
         setError(r.error ?? "Failed");
         setDownloadingIdx(null);
         return;
       }
-      const a = document.createElement("a");
-      a.href = r.downloadPath;
-      a.download = r.filename ?? "instagram.mp4";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      batch.addToQueue([{
+        url,
+        title: title,
+        filename: r.filename ?? "instagram.mp4",
+        downloadPath: r.downloadPath,
+      }]);
       setDownloadingIdx(null);
+      void batch.startBatch();
     });
   };
 
   const isCarousel = info && info.entries.length > 0;
+  const videoEntries = info?.entries.filter((e) => e.isVideo) ?? [];
+  const imageEntries = info?.images ?? [];
+  const downloadableMediaCount = videoEntries.length + imageEntries.length;
+
+  const handleDownloadAll = useCallback(async () => {
+    if (!info || !isCarousel) return;
+    const videoQueueItems = await Promise.all(
+      videoEntries.map(async (entry, i) => {
+        if (entry.downloadPath) {
+          return {
+            url,
+            title: entry.title,
+            filename: `${info.uploader_id || info.uploader}-slide${entry.index + 1}.mp4`,
+            downloadPath: entry.downloadPath,
+          };
+        }
+
+        const r = await prepareInstagramDownloadAction(
+          url,
+          `${info.uploader_id || info.uploader}-slide${entry.index + 1}`,
+          entry.index,
+        );
+        return {
+          url,
+          title: entry.title,
+          filename: r.filename ?? `instagram-slide${entry.index + 1}.mp4`,
+          downloadPath: r.downloadPath ?? "",
+        };
+      }),
+    );
+    const imageQueueItems = imageEntries.map((image) => ({
+      url: image.downloadPath,
+      title: `Instagram image ${image.index + 1}`,
+      filename: `instagram-${image.index + 1}.${image.extension}`,
+      downloadPath: image.downloadPath,
+    }));
+    batch.addToQueue(
+      [...videoQueueItems, ...imageQueueItems].filter((item) =>
+        Boolean(item.downloadPath),
+      ),
+    );
+    batch.startBatch();
+  }, [info, isCarousel, videoEntries, imageEntries, url, batch]);
 
   return (
     <DownloaderShell
       accentClass="text-purple-400"
       glowClass="bg-purple-600/5"
       borderGlow="border-purple-500/10"
+      batchSlot={
+        <BatchProgress
+          items={batch.items}
+          active={batch.active}
+          minimized={batch.minimized}
+          onToggleMinimize={() => batch.setMinimized(!batch.minimized)}
+          onCancel={batch.cancelAll}
+          onRetryFailed={batch.retryFailed}
+          onClearCompleted={batch.clearCompleted}
+          completed={batch.completed}
+          failed={batch.failed}
+          total={batch.total}
+        />
+      }
     >
       {/* Header */}
       <div className="flex items-center gap-3">
@@ -121,50 +190,36 @@ export default function InstagramDownloader() {
             Instagram Downloader
           </h1>
           <p className="text-xs text-zinc-500">
-            Reels · Posts · IGTV · Carousels
+            Reels · Photos · IGTV · Carousels
           </p>
         </div>
       </div>
 
       {/* Input */}
-      <div className="relative group">
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-yellow-500/10 to-purple-500/10 opacity-0 group-focus-within:opacity-100 blur-xl transition-opacity pointer-events-none" />
-        <div className="relative flex gap-2 glass rounded-2xl p-2 border border-white/6 group-focus-within:border-purple-500/30 transition-colors">
-          <input
-            type="url"
-            placeholder="Paste Instagram URL..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === "Enter" && !loading && url.trim() && handleFetch()
-            }
-            className="flex-1 bg-transparent px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none"
-          />
-          <button
-            onClick={handleFetch}
-            disabled={loading || !url.trim()}
-            className="px-4 py-2 rounded-xl text-white text-sm font-syne font-600 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity shadow-lg flex-shrink-0"
-            style={{ background: IG_GRADIENT }}
-          >
-            {isPending && downloadingIdx === null ? (
-              <span className="flex items-center gap-1.5">
-                <Spinner /> Fetching
-              </span>
-            ) : (
-              "Fetch"
-            )}
-          </button>
-        </div>
-      </div>
+      <SmartUrlInput
+        platformName="Instagram"
+        placeholder="Paste Instagram URL..."
+        value={url}
+        onValueChange={handleUrlChange}
+        onFetch={handleFetch}
+        disabled={loading}
+        fetching={isPending && downloadingIdx === null}
+        glowClassName="from-yellow-500/10 to-purple-500/10"
+        focusBorderClassName="group-focus-within:border-purple-500/30"
+        fetchButtonClassName="text-white shadow-purple-500/20"
+        fetchButtonStyle={{ background: IG_GRADIENT }}
+      />
 
       <p className="text-xs text-zinc-700 text-center">
         Public content only · /reel/ · /p/ · /tv/
       </p>
 
       {error && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-red-500/8 border border-red-500/20 text-red-400 text-sm">
-          <span className="flex-shrink-0">⚠</span> {error}
-        </div>
+        <UrlValidationError
+          error={error}
+          inputUrl={url}
+          expectedPlatform="instagram"
+        />
       )}
 
       {info && (
@@ -232,6 +287,25 @@ export default function InstagramDownloader() {
             </div>
           )}
 
+          <ImageMediaGallery
+            images={info.images}
+            platformLabel="Instagram"
+            onQueueImageDownload={(image, format) => {
+              const extension = format === "original" ? image.extension : format;
+              const downloadPath =
+                format === "original"
+                  ? image.downloadPath
+                  : `${image.downloadPath}&format=${format}`;
+              batch.addToQueue([{
+                url: downloadPath,
+                title: `Instagram image ${image.index + 1}`,
+                filename: `instagram-${image.index + 1}.${extension}`,
+                downloadPath,
+              }]);
+              void batch.startBatch();
+            }}
+          />
+
           {/* Single download */}
           {!isCarousel && !info.hasNoVideo && (
             <button
@@ -262,6 +336,24 @@ export default function InstagramDownloader() {
           {/* Carousel grid */}
           {isCarousel && (
             <div className="space-y-3">
+              {downloadableMediaCount > 1 && (
+                <button
+                  onClick={handleDownloadAll}
+                  disabled={batch.active}
+                  className="w-full py-3 rounded-2xl border border-purple-500/30 bg-purple-500/8 text-purple-400 font-syne font-600 text-sm hover:bg-purple-500/12 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                  </svg>
+                  Download All Media ({downloadableMediaCount})
+                </button>
+              )}
               <p className="text-xs text-zinc-600 font-medium uppercase tracking-wider">
                 Select slide
               </p>
