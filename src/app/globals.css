@@ -1,86 +1,196 @@
 @import "tailwindcss";
 
-/* Warm paper palette. Every text pair here is checked at WCAG AA (4.5:1 or more). */
 :root {
-  --background: #faf5ee;
-  --foreground: #2a211c;
-  --card: #fffdf9;
-  --card-foreground: #2a211c;
-  --muted: #f3e4d4;
-  --muted-foreground: #6e5e52;
-  --primary: #a8461f;
-  --primary-foreground: #ffffff;
-  --primary-hover: #8f3a18;
-  --secondary: #f3e4d4;
-  --secondary-foreground: #2a211c;
-  --accent: #f3e4d4;
-  --accent-foreground: #2a211c;
-  --success: #3f6b3a;
-  --destructive: #b42318;
-  --border: #e6d9ca;
-  --input: #d9c8b6;
-  --ring: #a8461f;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary-hover: var(--primary-hover);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-success: var(--success);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --font-syne: "Syne", sans-serif;
+  --font-dm: "DM Sans", sans-serif;
 }
 
 @layer base {
   * {
-    @apply border-border;
+    box-sizing: border-box;
   }
   html {
-    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
   }
-  body {
-    @apply bg-background font-sans text-foreground antialiased;
-  }
+
   ::selection {
-    background: var(--muted);
+    background: rgba(99, 102, 241, 0.3);
+    color: #fff;
   }
-  :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0d0d0d;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3a3a3a;
   }
 }
 
-/* Identity motif: the dashed cut line of a newspaper clipping, used where something is "kept". */
-@utility cut-line {
-  border-top: 2px dashed var(--input);
-}
-
-@utility cut-box {
-  border: 2px dashed var(--input);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+@layer utilities {
+  .font-syne {
+    font-family: var(--font-syne);
   }
+  .font-dm {
+    font-family: var(--font-dm);
+  }
+
+  .gradient-text-yt {
+    background: linear-gradient(135deg, #ff4444 0%, #ff8800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-tt {
+    background: linear-gradient(135deg, #ff2d6b 0%, #00e5ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-ig {
+    background: linear-gradient(135deg, #f9a825 0%, #e91e8c 50%, #9c27b0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-fb {
+    background: linear-gradient(135deg, #1877f2 0%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-tw {
+    background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-th {
+    background: linear-gradient(135deg, #e4e4e7 0%, #a1a1aa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-yt {
+    box-shadow: 0 0 40px rgba(255, 68, 68, 0.15);
+  }
+  .glow-tt {
+    box-shadow: 0 0 40px rgba(255, 45, 107, 0.15);
+  }
+  .glow-ig {
+    box-shadow: 0 0 40px rgba(233, 30, 140, 0.15);
+  }
+  .glow-fb {
+    box-shadow: 0 0 40px rgba(24, 119, 242, 0.15);
+  }
+  .glow-tw {
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.15);
+  }
+  .glow-th {
+    box-shadow: 0 0 40px rgba(161, 161, 170, 0.15);
+  }
+
+  .noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .input-glow:focus-within {
+    box-shadow:
+      0 0 0 1px rgba(99, 102, 241, 0.4),
+      0 0 20px rgba(99, 102, 241, 0.1);
+  }
+}
+
+@supports (content-visibility: auto) {
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 900px;
+  }
+}
+
+/* Page fade in */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fadeUp 0.5s ease forwards;
+}
+.delay-100 {
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite;
 }

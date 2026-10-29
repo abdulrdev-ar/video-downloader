@@ -1,65 +1,101 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Fraunces } from "next/font/google";
 import Script from "next/script";
-
-import { SITE_URL } from "@/common/constants/platforms";
-import ClientEnhancements from "@/components/feedback/client-enhancements";
-import SiteFooter from "@/components/layout/site-footer";
-import SiteHeader from "@/components/layout/site-header";
-
+import { Syne, DM_Sans } from "next/font/google";
+import ClientEnhancements from "@/components/client-enhancements";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const syne = Syne({
   subsets: ["latin"],
-  variable: "--font-fraunces",
-  axes: ["SOFT", "opsz"],
+  variable: "--font-syne",
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-dm",
+  weight: ["300", "400", "500"],
   display: "swap",
 });
 
-const DESCRIPTION =
-  "Simpan video, foto, dan audio dari post publik YouTube, TikTok, Instagram, Facebook, X, dan Threads. Tempel tautannya, pilih kualitas, selesai. Gratis, tanpa daftar.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL("https://saveit.app"),
   title: {
-    default: "SaveIt: Simpan Video dan Foto dari Media Sosial",
+    default: "SaveIt — Download Videos & Images Free",
     template: "%s | SaveIt",
   },
-  description: DESCRIPTION,
-  applicationName: "SaveIt",
+  description:
+    "Download public videos and images from YouTube, TikTok, Instagram, Facebook, X, and Threads.",
+  keywords: [
+    "video downloader",
+    "youtube downloader",
+    "tiktok downloader",
+    "instagram downloader",
+    "facebook downloader",
+    "twitter video downloader",
+    "twitter image downloader",
+    "x video downloader",
+    "threads downloader",
+    "social media image downloader",
+    "download youtube video",
+    "download tiktok no watermark",
+    "download instagram reel",
+    "batch download",
+    "free video downloader",
+    "mp4 downloader",
+    "online video downloader",
+    "pwa video downloader",
+  ],
+  authors: [{ name: "SaveIt" }],
+  creator: "SaveIt",
   openGraph: {
     type: "website",
-    locale: "id_ID",
-    url: SITE_URL,
+    locale: "en_US",
+    url: "https://saveit.app",
     siteName: "SaveIt",
-    title: "SaveIt: Simpan Video dan Foto dari Media Sosial",
-    description: DESCRIPTION,
-  },
-  twitter: { card: "summary", title: "SaveIt", description: DESCRIPTION },
-  manifest: "/manifest.json",
-  icons: {
-    icon: [{ url: "/icons/saveit-icon-192.png", sizes: "192x192" }],
-    apple: [
-      { url: "/icons/saveit-icon-192.png" },
-      { url: "/icons/saveit-icon-512.png", sizes: "512x512" },
+    title: "SaveIt — Download Videos & Images Free",
+    description:
+      "Download public videos and image posts from YouTube, TikTok, Instagram, Facebook, X, and Threads.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "SaveIt Video and Image Downloader",
+      },
     ],
   },
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "SaveIt" },
+  twitter: {
+    card: "summary_large_image",
+    title: "SaveIt — Download Videos & Images Free",
+    description:
+      "Download public videos and images from six supported platforms.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "SaveIt",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#faf5ee",
-  width: "device-width",
-  initialScale: 1,
+  themeColor: "#080808",
 };
 
-const SW_REGISTER = `if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); }); }`;
+const SW_REGISTER = `
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function() {});
+  });
+}
+`;
 
 export default function RootLayout({
   children,
@@ -67,23 +103,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={`${fraunces.variable} ${dmSans.variable}`}>
-      <body className="flex min-h-dvh flex-col">
-        <a
-          href="#konten"
-          className="sr-only z-50 rounded-md bg-card px-4 py-3 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
-        >
-          Langsung ke konten
-        </a>
-        <SiteHeader />
-        <main id="konten" className="flex-1">
-          {children}
-        </main>
-        <SiteFooter />
+    <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
+      <head>
+        <link rel="icon" href="/icons/saveit-icon-192.png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/icons/saveit-icon-192.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icons/saveit-icon-512.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <Script
+          id="saveit-service-worker"
+          strategy="lazyOnload"
+          dangerouslySetInnerHTML={{ __html: SW_REGISTER }}
+        />
+      </head>
+      <body className="bg-[#080808] text-white antialiased font-dm">
+        {children}
         <ClientEnhancements />
-        <Script id="saveit-sw" strategy="lazyOnload">
-          {SW_REGISTER}
-        </Script>
       </body>
     </html>
   );

@@ -1,0 +1,104 @@
+name: Deploy
+
+# Every push to main goes live. The image runs the yt-dlp + gallery-dl +
+# ffmpeg engine, so it ships as a Docker image instead of serverless.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm test
+
+  docker:
+    name: Build & Push
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # GHCR requires a lowercase image name; github.repository preserves the
+      # repo's real casing.
+      - name: Compute image name and tag
+        id: image
+        run: |
+          echo "name=${REGISTRY}/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+          echo "sha=sha-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        run: docker build -t ${{ steps.image.outputs.name }}:${{ steps.image.outputs.sha }} .
+
+      # Boot the image and hit / before pushing, so a broken build never
+      # reaches Render. The image listens on PORT (7860 by default).
+      - name: Smoke test
+        run: |
+          docker run -d --name smoke -p 7860:7860 ${{ steps.image.outputs.name }}:${{ steps.image.outputs.sha }}
+          for i in $(seq 1 30); do
+            curl -fsS -o /dev/null http://127.0.0.1:7860/ && exit 0
+            sleep 2
+          done
+          docker logs smoke
+          exit 1
+
+      # Single sha tag, no `latest`: the Render deploy hook pins the exact image.
+      - name: Push image
+        run: docker push ${{ steps.image.outputs.name }}:${{ steps.image.outputs.sha }}
+
+  deploy:
+    name: Deploy to Render
+    needs: docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Compute image name and tag
+        id: image
+        run: |
+          echo "name=${REGISTRY}/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+          echo "sha=sha-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+      # RENDER_DEPLOY_HOOK_URL already includes `?key=...`; imgURL is appended
+      # as a second query param, so Render deploys exactly this image.
+      - name: Trigger Render deploy
+        run: |
+          curl -fsS -X POST \
+            "${{ secrets.RENDER_DEPLOY_HOOK_URL }}&imgURL=${{ steps.image.outputs.name }}:${{ steps.image.outputs.sha }}"
