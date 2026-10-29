@@ -42,7 +42,7 @@ self.addEventListener("install", (event) => {
     (PRECACHE_URLS.length
       ? caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
       : Promise.resolve()
-    ).then(() => self.skipWaiting()),
+    ).then(() => self.skipWaiting())
   );
 });
 
@@ -54,10 +54,10 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           keys
             .filter((key) => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
-            .map((key) => caches.delete(key)),
-        ),
+            .map((key) => caches.delete(key))
+        )
       )
-      .then(() => self.clients.claim()),
+      .then(() => self.clients.claim())
   );
 });
 
@@ -88,7 +88,7 @@ self.addEventListener("fetch", (event) => {
           safePut(STATIC_CACHE, request, response);
           return response;
         });
-      }),
+      })
     );
     return;
   }
@@ -103,6 +103,6 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(request)),
+      .catch(() => caches.match(request))
   );
 });

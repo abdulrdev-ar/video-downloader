@@ -3,6 +3,7 @@ import type { Config } from "jest";
 const config: Config = {
   testEnvironment: "node",
   roots: ["<rootDir>/src"],
+  setupFiles: ["reflect-metadata"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
@@ -14,6 +15,8 @@ const config: Config = {
           jsx: "react-jsx",
           esModuleInterop: true,
           moduleResolution: "bundler",
+          experimentalDecorators: true,
+          emitDecoratorMetadata: true,
           paths: { "@/*": ["./src/*"] },
         },
       },

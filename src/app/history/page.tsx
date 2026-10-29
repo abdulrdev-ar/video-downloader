@@ -1,13 +1,27 @@
 import type { Metadata } from "next";
-import HistoryPage from "./history-page";
+
+import HistoryList from "./components/history-list";
 
 export const metadata: Metadata = {
-  title: "Download History",
+  title: "Riwayat Unduhan",
   description:
-    "View and manage your download history. Re-download past videos from YouTube, TikTok, Instagram, Facebook, X, and Threads.",
-  alternates: { canonical: "https://saveit.app/history" },
+    "Daftar file yang pernah kamu simpan lewat SaveIt di browser ini.",
+  robots: { index: false, follow: true },
 };
 
 export default function Page() {
-  return <HistoryPage />;
+  return (
+    <div className="mx-auto max-w-2xl px-4 pt-10 sm:px-6 sm:pt-14">
+      <div className="mb-6 space-y-2">
+        <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+          Riwayat unduhan
+        </h1>
+        <p className="text-[17px] leading-relaxed text-muted-foreground">
+          Tersimpan hanya di browser ini. Kami tidak mencatat apa yang kamu
+          unduh.
+        </p>
+      </div>
+      <HistoryList />
+    </div>
+  );
 }

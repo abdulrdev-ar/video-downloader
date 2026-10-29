@@ -1,0 +1,522 @@
+{
+  "eslint.config.mjs": {
+    "mtime": 1793246568.3921578,
+    "ast_hash": "6c4307ffa009658f5c97f5629094c0c2",
+    "semantic_hash": ""
+  },
+  "jest.config.ts": {
+    "mtime": 1793246568.3932288,
+    "ast_hash": "6f3ea3f4e471873e11e2284361e4c0e1",
+    "semantic_hash": ""
+  },
+  "next.config.ts": {
+    "mtime": 1793246568.3932288,
+    "ast_hash": "0418b5a1e5b8c60b425ba314d881b840",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1793255257.0242188,
+    "ast_hash": "8ced704459a1d2f64aef0e18e65d18ea",
+    "semantic_hash": ""
+  },
+  "postcss.config.mjs": {
+    "mtime": 1793246568.3962302,
+    "ast_hash": "481fac0fdecd70e1821cc30b86030c1a",
+    "semantic_hash": ""
+  },
+  "public/manifest.json": {
+    "mtime": 1793246568.402228,
+    "ast_hash": "b283b7d57cfde9cc17f87bdba48c8a35",
+    "semantic_hash": ""
+  },
+  "public/sw.js": {
+    "mtime": 1793246568.4033418,
+    "ast_hash": "8948f17f4ce2762cb1328e0bfef055c1",
+    "semantic_hash": ""
+  },
+  "scripts/generate-icons.mjs": {
+    "mtime": 1793246568.4043462,
+    "ast_hash": "2256395772ee71f86f1f81ddbc6b5a3a",
+    "semantic_hash": ""
+  },
+  "src/actions/facebook-downloader.action.ts": {
+    "mtime": 1793246568.4053462,
+    "ast_hash": "f92a41c116b6ef125f458bde8ce7e60b",
+    "semantic_hash": ""
+  },
+  "src/actions/instagram-downloader.action.ts": {
+    "mtime": 1793246568.4063463,
+    "ast_hash": "91469af4a6a099b775236e88523eb963",
+    "semantic_hash": ""
+  },
+  "src/actions/threads-downloader.action.ts": {
+    "mtime": 1793246568.4063463,
+    "ast_hash": "204a92c3298a271a81522a9d44678a97",
+    "semantic_hash": ""
+  },
+  "src/actions/tiktok-downloader.action.ts": {
+    "mtime": 1793246568.4063463,
+    "ast_hash": "0dc272b2f5e55e0376477ee25b3d7b87",
+    "semantic_hash": ""
+  },
+  "src/actions/twitter-downloader.action.ts": {
+    "mtime": 1793246568.4063463,
+    "ast_hash": "634a709de69e79895a1e879eb89acebc",
+    "semantic_hash": ""
+  },
+  "src/actions/youtube-downloader.action.ts": {
+    "mtime": 1793246568.4073462,
+    "ast_hash": "c426c55a72f14e7fe4843d4c14461ebf",
+    "semantic_hash": ""
+  },
+  "src/app/facebook/facebook-downloader.tsx": {
+    "mtime": 1793246568.408345,
+    "ast_hash": "b03219e4680dc55557a9d4f7d8ec52e0",
+    "semantic_hash": ""
+  },
+  "src/app/facebook/page.tsx": {
+    "mtime": 1793246568.4093473,
+    "ast_hash": "3e3ca0f34d106eb78e6f486e66fc9469",
+    "semantic_hash": ""
+  },
+  "src/app/history/history-page.tsx": {
+    "mtime": 1793246568.4103453,
+    "ast_hash": "3312ec1e9cb1983379cf78800795de76",
+    "semantic_hash": ""
+  },
+  "src/app/history/page.tsx": {
+    "mtime": 1793246568.4103453,
+    "ast_hash": "22117d0854fb0e2bad01dc5ae3043be6",
+    "semantic_hash": ""
+  },
+  "src/app/instagram/instagram-downloader.tsx": {
+    "mtime": 1793246568.4103453,
+    "ast_hash": "da566825e6e16b8cfc52ebadfd83f8ee",
+    "semantic_hash": ""
+  },
+  "src/app/instagram/page.tsx": {
+    "mtime": 1793246568.4120324,
+    "ast_hash": "a1214449cded8737015aaf0b9a980216",
+    "semantic_hash": ""
+  },
+  "src/app/internal/download/facebook/route.ts": {
+    "mtime": 1793246568.413537,
+    "ast_hash": "74590361229f8df2d4976e597f6dbc14",
+    "semantic_hash": ""
+  },
+  "src/app/internal/download/instagram/route.ts": {
+    "mtime": 1793246568.413537,
+    "ast_hash": "99dcceb17a09b7fb065aad747f8ee656",
+    "semantic_hash": ""
+  },
+  "src/app/internal/download/threads/route.ts": {
+    "mtime": 1793246568.4145422,
+    "ast_hash": "bfd7abe0129d530b790aaa2b581f1abf",
+    "semantic_hash": ""
+  },
+  "src/app/internal/download/tiktok/route.ts": {
+    "mtime": 1793246568.4155436,
+    "ast_hash": "b34ce2b8cae25a56e267372094784692",
+    "semantic_hash": ""
+  },
+  "src/app/internal/download/twitter/route.ts": {
+    "mtime": 1793246568.4155436,
+    "ast_hash": "70a4664c721fa13d14a3def126bd5ebb",
+    "semantic_hash": ""
+  },
+  "src/app/internal/download/youtube/route.ts": {
+    "mtime": 1793246568.4165425,
+    "ast_hash": "16d6ec8e7f94d19630acf06c6d9ba380",
+    "semantic_hash": ""
+  },
+  "src/app/internal/media/image/route.ts": {
+    "mtime": 1793246568.4175425,
+    "ast_hash": "a92b6b658866e51759614a9a7013ffd3",
+    "semantic_hash": ""
+  },
+  "src/app/internal/media/video/route.ts": {
+    "mtime": 1793246568.4175425,
+    "ast_hash": "b3697e2eb4b594b3ab0de15f3a3438ae",
+    "semantic_hash": ""
+  },
+  "src/app/internal/preview/instagram/route.ts": {
+    "mtime": 1793246568.4185424,
+    "ast_hash": "288c21c7bbd35bae5090180be38d53fd",
+    "semantic_hash": ""
+  },
+  "src/app/internal/progress/cancel/route.ts": {
+    "mtime": 1793246568.4195426,
+    "ast_hash": "54683567d67f6d539b9479860bc31acb",
+    "semantic_hash": ""
+  },
+  "src/app/internal/progress/file/route.ts": {
+    "mtime": 1793246568.4205422,
+    "ast_hash": "faee9fd36c723cfc5e7f3064559b8f96",
+    "semantic_hash": ""
+  },
+  "src/app/internal/progress/start/route.ts": {
+    "mtime": 1793246568.4205422,
+    "ast_hash": "03b820c8a6f9b940ab3032e623f587a5",
+    "semantic_hash": ""
+  },
+  "src/app/internal/progress/status/route.ts": {
+    "mtime": 1793246568.4205422,
+    "ast_hash": "9982a3f5150d369b9b93af59aabacc4b",
+    "semantic_hash": ""
+  },
+  "src/app/internal/spike/route.ts": {
+    "mtime": 1793255451.109811,
+    "ast_hash": "4c77a29e52bd140f79b862b7ab397f3b",
+    "semantic_hash": ""
+  },
+  "src/app/layout.tsx": {
+    "mtime": 1793246568.4220467,
+    "ast_hash": "56fa227ec95a8ad75e25b69a72fa9233",
+    "semantic_hash": ""
+  },
+  "src/app/page.tsx": {
+    "mtime": 1793246568.4220467,
+    "ast_hash": "7e1209ebb7c24a3a9bd672a90741b21b",
+    "semantic_hash": ""
+  },
+  "src/app/spike/page.tsx": {
+    "mtime": 1793255373.3126688,
+    "ast_hash": "cf165ada2cc01447bba803390eaf62ea",
+    "semantic_hash": ""
+  },
+  "src/app/spike/spike-runner.tsx": {
+    "mtime": 1793255374.101868,
+    "ast_hash": "f8c416410735d24c3d10cba4d2fd811b",
+    "semantic_hash": ""
+  },
+  "src/app/threads/page.tsx": {
+    "mtime": 1793246568.4230525,
+    "ast_hash": "82a3baca6ed1a3c5932d5dfcc1685864",
+    "semantic_hash": ""
+  },
+  "src/app/threads/threads-downloader.tsx": {
+    "mtime": 1793246568.4230525,
+    "ast_hash": "811b595967c902f5919a014e61177fa0",
+    "semantic_hash": ""
+  },
+  "src/app/tiktok/page.tsx": {
+    "mtime": 1793246568.4240525,
+    "ast_hash": "e7ae958479b02a5851c06efcefd3527c",
+    "semantic_hash": ""
+  },
+  "src/app/tiktok/tiktok-downloader.tsx": {
+    "mtime": 1793246568.4240525,
+    "ast_hash": "b4bc7fb848a175df5803cd114a3d4b58",
+    "semantic_hash": ""
+  },
+  "src/app/twitter/page.tsx": {
+    "mtime": 1793246568.4250548,
+    "ast_hash": "e6a7baf0582e36ce81351de2d3fb6d45",
+    "semantic_hash": ""
+  },
+  "src/app/twitter/twitter-downloader.tsx": {
+    "mtime": 1793246568.4250548,
+    "ast_hash": "30dfc84a216567042c1f32e7c81a8ac1",
+    "semantic_hash": ""
+  },
+  "src/app/youtube/page.tsx": {
+    "mtime": 1793246568.4260526,
+    "ast_hash": "d6ca7ef5535300d524b396b58a7c1596",
+    "semantic_hash": ""
+  },
+  "src/app/youtube/youtube-downloader.tsx": {
+    "mtime": 1793246568.4270525,
+    "ast_hash": "d025d572b70330a1b18ec03b366e51db",
+    "semantic_hash": ""
+  },
+  "src/components/__tests__/smart-url-input.test.tsx": {
+    "mtime": 1793246568.4280517,
+    "ast_hash": "4616f106317f5b00c472a21b8dde2dd0",
+    "semantic_hash": ""
+  },
+  "src/components/batch-progress.tsx": {
+    "mtime": 1793246568.4280517,
+    "ast_hash": "997867854375619db906dc39b47e8881",
+    "semantic_hash": ""
+  },
+  "src/components/client-enhancements.tsx": {
+    "mtime": 1793246568.4280517,
+    "ast_hash": "64fb7e4c0b56e616a4c23673f0b091e4",
+    "semantic_hash": ""
+  },
+  "src/components/downloader-shell.tsx": {
+    "mtime": 1793246568.4290524,
+    "ast_hash": "b374ab949b56ae0ffb7eaf92c9451173",
+    "semantic_hash": ""
+  },
+  "src/components/image-media-gallery.tsx": {
+    "mtime": 1793246568.4290524,
+    "ast_hash": "10a556ca9344444f88d03a7a6808406c",
+    "semantic_hash": ""
+  },
+  "src/components/navbar.tsx": {
+    "mtime": 1793246568.4290524,
+    "ast_hash": "f4ab216d5c12e270d64187e3fc09379f",
+    "semantic_hash": ""
+  },
+  "src/components/offline-indicator.tsx": {
+    "mtime": 1793246568.430052,
+    "ast_hash": "cccca018dc1b2b70386cdd6d10383614",
+    "semantic_hash": ""
+  },
+  "src/components/pwa-install-prompt.tsx": {
+    "mtime": 1793246568.430052,
+    "ast_hash": "60d8e8824578e4bfd65afd3620e971dd",
+    "semantic_hash": ""
+  },
+  "src/components/smart-url-input.tsx": {
+    "mtime": 1793246568.431052,
+    "ast_hash": "77fd1419fe1c59e32bbf6a60ddf55285",
+    "semantic_hash": ""
+  },
+  "src/components/ui/progress-bar.tsx": {
+    "mtime": 1793246568.431052,
+    "ast_hash": "ea885f50ae848628dee02b1e4980c911",
+    "semantic_hash": ""
+  },
+  "src/components/ui/spinner.tsx": {
+    "mtime": 1793246568.431052,
+    "ast_hash": "84135f6af4e07ba3bd083179c50b3984",
+    "semantic_hash": ""
+  },
+  "src/components/url-validation-error.tsx": {
+    "mtime": 1793246568.4320543,
+    "ast_hash": "a22dff392a6e1f4e22cc3529fd76b280",
+    "semantic_hash": ""
+  },
+  "src/core/hooks/__tests__/use-batch-download.test.ts": {
+    "mtime": 1793246568.4331083,
+    "ast_hash": "08d2716e741f4af4c2b5be557e123596",
+    "semantic_hash": ""
+  },
+  "src/core/hooks/__tests__/use-download-history.test.ts": {
+    "mtime": 1793246568.4331083,
+    "ast_hash": "d28d34334fef5a299a95993c16679079",
+    "semantic_hash": ""
+  },
+  "src/core/hooks/use-batch-download.ts": {
+    "mtime": 1793246568.434108,
+    "ast_hash": "9f7b22f0280c472f8a24741ecb7678ee",
+    "semantic_hash": ""
+  },
+  "src/core/hooks/use-download-history.ts": {
+    "mtime": 1793246568.434108,
+    "ast_hash": "2d958111cbdcd1a0dd57b86030ef2e59",
+    "semantic_hash": ""
+  },
+  "src/core/server/download-job-store.ts": {
+    "mtime": 1793246568.4351082,
+    "ast_hash": "4ba6e8ad92de9850507a4e4297a10b7d",
+    "semantic_hash": ""
+  },
+  "src/core/server/media-compat.ts": {
+    "mtime": 1793246568.4351082,
+    "ast_hash": "0b2d5160ac9533fe621fbe8682980860",
+    "semantic_hash": ""
+  },
+  "src/core/services/__tests__/facebook.service.test.ts": {
+    "mtime": 1793246568.4361076,
+    "ast_hash": "77a74599d0026f7e3bd6394ec112cd2a",
+    "semantic_hash": ""
+  },
+  "src/core/services/__tests__/instagram.service.test.ts": {
+    "mtime": 1793246568.4361076,
+    "ast_hash": "fdf47713bba0374352b41d0712f22fa6",
+    "semantic_hash": ""
+  },
+  "src/core/services/__tests__/social-image.service.test.ts": {
+    "mtime": 1793246568.437108,
+    "ast_hash": "997016a806e07976b0967527df36d8b5",
+    "semantic_hash": ""
+  },
+  "src/core/services/__tests__/threads.service.test.ts": {
+    "mtime": 1793246568.437108,
+    "ast_hash": "81838c9a7fed424850947684b17476da",
+    "semantic_hash": ""
+  },
+  "src/core/services/__tests__/tiktok.service.test.ts": {
+    "mtime": 1793246568.4381082,
+    "ast_hash": "db169711776820ae0e953b057faedea0",
+    "semantic_hash": ""
+  },
+  "src/core/services/__tests__/twitter.service.test.ts": {
+    "mtime": 1793246568.4381082,
+    "ast_hash": "a992837b0d09a5276e60cc7633f4f959",
+    "semantic_hash": ""
+  },
+  "src/core/services/__tests__/youtube.service.test.ts": {
+    "mtime": 1793246568.4381082,
+    "ast_hash": "8240998303d786d6284deb0988ff3091",
+    "semantic_hash": ""
+  },
+  "src/core/services/facebook.service.ts": {
+    "mtime": 1793246568.439108,
+    "ast_hash": "5cd2e2bc8f7f4a97992df512474ce333",
+    "semantic_hash": ""
+  },
+  "src/core/services/instagram.service.ts": {
+    "mtime": 1793246568.439108,
+    "ast_hash": "0fcc1e9a514f8fbb7d58d061f4dbedf3",
+    "semantic_hash": ""
+  },
+  "src/core/services/social-image.service.ts": {
+    "mtime": 1793246568.4401083,
+    "ast_hash": "d5928ac55db55e5048914ebd7792dbd6",
+    "semantic_hash": ""
+  },
+  "src/core/services/threads.service.ts": {
+    "mtime": 1793246568.4401083,
+    "ast_hash": "5d31a27ced6f995e4d645884ef5dfa69",
+    "semantic_hash": ""
+  },
+  "src/core/services/tiktok.service.ts": {
+    "mtime": 1793246568.441108,
+    "ast_hash": "7462529775f4e9516321ffb7d7a77160",
+    "semantic_hash": ""
+  },
+  "src/core/services/twitter.service.ts": {
+    "mtime": 1793246568.441108,
+    "ast_hash": "3b5a82bc862363ee430c0c8151cd5433",
+    "semantic_hash": ""
+  },
+  "src/core/services/youtube.service.ts": {
+    "mtime": 1793246568.441108,
+    "ast_hash": "91f9a02534e493e89dfee6d2824bc486",
+    "semantic_hash": ""
+  },
+  "src/core/utils/__tests__/format-helpers.test.ts": {
+    "mtime": 1793246568.442108,
+    "ast_hash": "2ff72def82dcfb38a07d0363a5392b15",
+    "semantic_hash": ""
+  },
+  "src/core/utils/__tests__/url-validators.test.ts": {
+    "mtime": 1793246568.4434466,
+    "ast_hash": "c833b0af84c82c31fe7de0fe7a8d6625",
+    "semantic_hash": ""
+  },
+  "src/core/utils/format-helpers.ts": {
+    "mtime": 1793246568.4434466,
+    "ast_hash": "914704655ee80e52e2fa74a3d210024d",
+    "semantic_hash": ""
+  },
+  "src/core/utils/url-validators.ts": {
+    "mtime": 1793246568.4434466,
+    "ast_hash": "3658c0e28387c69bebb450cba0af558e",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1793246568.4444468,
+    "ast_hash": "0a2f4ed9289b65cd3feb4fb4ab3a4fcd",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1793154730.631921,
+    "ast_hash": "c98dbebb744eadc1acc4b9f58bfe0f42",
+    "semantic_hash": ""
+  },
+  "ARCHITECTURE.md": {
+    "mtime": 1793152071.566873,
+    "ast_hash": "e839b6a395f11c2576c9d751ad1a527b",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1793152281.792196,
+    "ast_hash": "fc6d540b1a051071db5dec9ed684988d",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1793246568.3921578,
+    "ast_hash": "febc6de115c9217b3d138f3417add98b",
+    "semantic_hash": ""
+  },
+  "docker-compose.yml": {
+    "mtime": 1793246568.3921578,
+    "ast_hash": "dc989442b93148d4926f1ccdbb713126",
+    "semantic_hash": ""
+  },
+  "docs/vercel-migration.md": {
+    "mtime": 1793255535.3151386,
+    "ast_hash": "f2ae108812ebd8cd99b4389be73ef6c7",
+    "semantic_hash": ""
+  },
+  "implementation_plan.md": {
+    "mtime": 1793246568.3921578,
+    "ast_hash": "602d8d2d7e4f5f895943bd126db77a76",
+    "semantic_hash": ""
+  },
+  "pnpm-workspace.yaml": {
+    "mtime": 1793246568.3952348,
+    "ast_hash": "a66b39ff3c471027b1f033952af80aaa",
+    "semantic_hash": ""
+  },
+  "public/file.svg": {
+    "mtime": 1793246568.3962302,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "public/globe.svg": {
+    "mtime": 1793246568.3972292,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "public/icons/icon-192.png": {
+    "mtime": 1793246568.3972292,
+    "ast_hash": "4cec31e982a56ecf2649b86541e4eea0",
+    "semantic_hash": ""
+  },
+  "public/icons/icon-512.png": {
+    "mtime": 1793246568.3972292,
+    "ast_hash": "47daf9e8bfa86271b8624a487bedb6da",
+    "semantic_hash": ""
+  },
+  "public/icons/saveit-icon-192.jpg": {
+    "mtime": 1793246568.398229,
+    "ast_hash": "4810eb6bcb9d6aca69072723113c01ca",
+    "semantic_hash": ""
+  },
+  "public/icons/saveit-icon-192.png": {
+    "mtime": 1793246568.398229,
+    "ast_hash": "451af24afd727440df7aa37bdf6df489",
+    "semantic_hash": ""
+  },
+  "public/icons/saveit-icon-512.jpg": {
+    "mtime": 1793246568.3992302,
+    "ast_hash": "c905431c74de0999be142630506b9e65",
+    "semantic_hash": ""
+  },
+  "public/icons/saveit-icon-512.png": {
+    "mtime": 1793246568.4002416,
+    "ast_hash": "fe2c5f79cb2b51211aaedb25f99f5b61",
+    "semantic_hash": ""
+  },
+  "public/icons/saveit-maskable-512.jpg": {
+    "mtime": 1793246568.4012375,
+    "ast_hash": "d16ba7328899379b94043c1e1ccba721",
+    "semantic_hash": ""
+  },
+  "public/icons/saveit-maskable-512.png": {
+    "mtime": 1793246568.402228,
+    "ast_hash": "4ce0a70484cce08419ce25d6ea7a76b2",
+    "semantic_hash": ""
+  },
+  "public/next.svg": {
+    "mtime": 1793246568.402228,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "public/vercel.svg": {
+    "mtime": 1793246568.4033418,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "public/window.svg": {
+    "mtime": 1793246568.4043462,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  }
+}

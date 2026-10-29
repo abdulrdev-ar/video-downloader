@@ -2,21 +2,38 @@
   "name": "downloader",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": [
+    "src/common/di/injection.ts",
+    "src/core/services/youtube-client.ts",
+    "*.css"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "oxlint .",
+    "format": "oxfmt",
+    "check": "oxlint . && oxfmt --check",
+    "fix": "oxlint --fix . && oxfmt",
     "test": "jest"
   },
   "dependencies": {
-    "@tobyg74/tiktok-api-dl": "^1.3.7",
     "cheerio": "^1.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "fp-ts": "^2.16.11",
+    "mediabunny": "^1.63.0",
     "next": "16.1.6",
+    "pino": "^10.4.0",
+    "radix-ui": "^1.8.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "reflect-metadata": "^0.2.2",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.7.0",
+    "tsyringe": "^4.10.0",
     "youtubei.js": "^18.3.0",
-    "yt-dlp-wrap": "^2.3.12"
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -26,10 +43,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.11",
     "typescript": "^5"

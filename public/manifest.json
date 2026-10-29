@@ -1,12 +1,12 @@
 {
-  "name": "SaveIt - Video & Image Downloader",
+  "name": "SaveIt: Simpan Video dan Foto",
   "short_name": "SaveIt",
-  "description": "Download public videos and images from YouTube, TikTok, Instagram, Facebook, X, and Threads.",
+  "description": "Simpan video, foto, dan audio dari post publik YouTube, TikTok, Instagram, Facebook, X, dan Threads.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#080808",
-  "background_color": "#080808",
+  "theme_color": "#faf5ee",
+  "background_color": "#faf5ee",
   "orientation": "any",
   "categories": ["utilities", "entertainment"],
   "icons": [
@@ -28,5 +28,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "lang": "id"
 }
