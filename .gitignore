@@ -49,3 +49,4 @@ package-lock.json
 
 # local browser test artifacts
 /.playwright-mcp
+graphify-out/cache
